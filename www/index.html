@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        -->
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta charset="utf-8">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <title>Hello World</title>
+        
+    </head>
+
+    <body>
+
+        <div class="row">
+            <div class="col-sm-4"></div>
+
+            <div class="col-sm-4" align="center">
+            	<!-- OVO TO JE DIV GDE NAM SE PRIKAZUJE MAPA -->
+                <div id="mapa">
+
+                </div>
+
+                <br/>
+
+                <div id="movementSpeedDiv">
+                    <h3 id="movementSpeed">0.00 m/s</h3>
+                </div>
+
+                <button type="button" class="buttons" data-toggle="modal" data-target="#mapaModal">Show</button>
+                <!--<input type="button" id="createFile" value="Create file">
+                <input type="button" id="writeFile" value="Write file">
+                <input type="button" id="readFile" value="Read file">
+                <input type="button" id="deleteFile" value="Delete file"> 
+                
+                <div>
+                    <p id="imageWidth"></p>
+
+                    <p id="textarea"></p>
+                </div>-->
+
+                <div id="mapaModal" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div>
+                
+                                    <!-- OVO TREBA DA NAM IZADJE kao popup Box (kao u meteor za kreiranje sobe ili za acc) pritsikom na ovo gore dugme -->
+                   		
+                                   <form>
+                                        <div class="form-group">
+                                            <label>First Name:</label>
+                                            <input type="text" class="form-control" id="firstname" maxlength="20" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Last Name:</label>
+                                            <input type="text" class="form-control" id="lastname" maxlength="30" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>E-mail:</label>
+                                            <input type="email" class="form-control" id="email" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Mobile number:</label>
+                                            <input type="tel" class="form-control" id="mobilenumber" maxlength="15" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Title:</label>
+                                            <input type="text" class="form-control" id="title" maxlength="20" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Short Text:</label>
+                                            <textarea class="form-control" rows="4" cols="50" maxlength="200" id="shortText" required></textarea>
+                                        </div>
+
+                                        <input type="button" id="takeAPicture" value="Take a picture">
+                                        <input type="button" id="getPicture" value="Get picture from galery"><br/>
+
+
+                                        <input type="button" id="submit" class="buttons" value="Submit">
+                                    </form>
+
+           		               </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="buttons" data-dismiss="modal">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                
+                <!--<div id="divSlika" style="display: none">
+
+                    <img id="slika0" src="">
+                    <img id="slika1" src="">
+                    <img id="slika2" src="">
+                    <img id="slika3" src="">
+
+                </div>-->
+
+            </div>
+
+            <div class="col-sm-4"></div>
+        </div>
+
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQb8qpxGoe5xH38ujjEmEt1di59eQEojk"></script>
+        <script type="text/javascript" src = "js/jquery-3.2.0.js"></script>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    </body>
+</html>
