@@ -31,6 +31,7 @@
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
         <link rel="stylesheet" type="text/css" href="css/index.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -44,6 +45,40 @@
             <div class="col-sm-4"></div>
 
             <div class="col-sm-4" align="center">
+
+                <div class="input-group" id="adv-search">
+                    <input type="text" class="form-control" placeholder="Search" />
+                    <div class="input-group-btn">
+                        <div class="btn-group" role="group">
+                            <div class="dropdown dropdown-lg">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="caret"></span></button>
+                                <div class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label for="filter">Search in:</label>
+                                            <select class="form-control">
+                                                <option value="0" selected>Your reports</option>
+                                                <option value="1">All reports</option>
+                                            </select>
+                                            <br/>
+                                            <br/></br/>
+                                            <label for="filter">Search by:</label>
+                                            <select class="form-control">
+                                                <option value="0" selected>Name</option>
+                                                <option value="1">Mobile number</option>
+                                                <option value="2">Email</option>
+                                                <option value="3">Distance</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                                    </form>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                        </div>
+                    </div>
+                </div>
+                <br/>
             	<!-- OVO TO JE DIV GDE NAM SE PRIKAZUJE MAPA -->
                 <div id="mapa">
 
@@ -55,7 +90,7 @@
                     <h3 id="movementSpeed">0.00 m/s</h3>
                 </div>
 
-                <button type="button" class="buttons" data-toggle="modal" data-target="#mapaModal">Show</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#mapaModal">Show</button>
                 <!--<input type="button" id="createFile" value="Create file">
                 <input type="button" id="writeFile" value="Write file">
                 <input type="button" id="readFile" value="Read file">
@@ -103,18 +138,18 @@
                                             <textarea class="form-control" rows="4" cols="50" maxlength="200" id="shortText" required></textarea>
                                         </div>
 
-                                        <input type="button" id="takeAPicture" value="Take a picture">
-                                        <input type="button" id="getPicture" value="Get picture from galery"><br/>
+                                        <input type="button" id="takeAPicture" class="btn btn-primary" value="Take a picture">
+                                        <input type="button" id="getPicture" class="btn btn-primary" value="Get picture from galery"><br/><br/>
 
 
-                                        <input type="button" id="submit" class="buttons" value="Submit">
+                                        <input type="button" id="submit" class="btn btn-primary" value="Submit">
                                     </form>
 
            		               </div>
                             </div>
 
                             <div class="modal-footer">
-                                <button type="button" class="buttons" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                             </div>
 
                         </div>
