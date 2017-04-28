@@ -35,7 +35,7 @@
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
         <link rel="stylesheet" type="text/css" href="css/index.css">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <title>Hello World</title>
+        <title>EcologyProject</title>
         
     </head>
 
@@ -47,7 +47,7 @@
             <div class="col-sm-4" align="center">
 
                 <div class="input-group" id="adv-search">
-                    <input type="text" class="form-control" placeholder="Search" />
+                    <input type="text" class="form-control" id="searchText" placeholder="Search" />
                     <div class="input-group-btn">
                         <div class="btn-group" role="group">
                             <div class="dropdown dropdown-lg">
@@ -56,25 +56,25 @@
                                     <form class="form-horizontal" role="form">
                                         <div class="form-group">
                                             <label for="filter">Search in:</label>
-                                            <select class="form-control">
+                                            <select id="SearchIn" class="form-control">
                                                 <option value="0" selected>Your reports</option>
                                                 <option value="1">All reports</option>
                                             </select>
                                             <br/>
                                             <br/></br/>
                                             <label for="filter">Search by:</label>
-                                            <select class="form-control">
-                                                <option value="0" selected>Name</option>
-                                                <option value="1">Mobile number</option>
-                                                <option value="2">Email</option>
-                                                <option value="3">Distance</option>
+                                            <select id="SearchBy" class="form-control">
+                                                <option value="0" selected>Distance</option>
+                                                <!--<option value="1">Name</option>
+                                                <option value="2">Mobile number</option>
+                                                <option value="3">Email</option>-->
                                             </select>
                                         </div>
                                         <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
                                     </form>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-primary"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
+                            <button type="button" class="btn btn-primary" id="searchButton"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
                         </div>
                     </div>
                 </div>
@@ -116,31 +116,37 @@
                                         <div class="form-group">
                                             <label>First Name:</label>
                                             <input type="text" class="form-control" id="firstname" maxlength="20" required>
+                                            <span id="firstNameError" class="error"></span>
                                         </div>
                                         <div class="form-group">
                                             <label>Last Name:</label>
                                             <input type="text" class="form-control" id="lastname" maxlength="30" required>
+                                            <span id="lastNameError" class="error"></span>
                                         </div>
                                         <div class="form-group">
                                             <label>E-mail:</label>
                                             <input type="email" class="form-control" id="email" required>
+                                            <span id="emailError" class="error"></span>
                                         </div>
                                         <div class="form-group">
                                             <label>Mobile number:</label>
-                                            <input type="tel" class="form-control" id="mobilenumber" maxlength="15" required>
+                                            <input type="tel" class="form-control" id="mobilenumber" maxlength="15" placeholder="061123456789" required>
+                                            <span id="mobileNumberError" class="error"></span>
                                         </div>
                                         <div class="form-group">
                                             <label>Title:</label>
                                             <input type="text" class="form-control" id="title" maxlength="20" required>
+                                            <span id="titleNameError" class="error"></span>
                                         </div>
                                         <div class="form-group">
                                             <label>Short Text:</label>
                                             <textarea class="form-control" rows="4" cols="50" maxlength="200" id="shortText" required></textarea>
+                                            <span id="shortTextError" class="error"></span>
                                         </div>
 
-                                        <input type="button" id="takeAPicture" class="btn btn-primary" value="Take a picture">
-                                        <input type="button" id="getPicture" class="btn btn-primary" value="Get picture from galery"><br/><br/>
-
+                                        <input type="button" id="takeAPicture" class="btn btn-primary" value="Take a picture"><br/>
+                                        <span id="imageError" class="error"></span>
+                                        <br/><br/>
 
                                         <input type="button" id="submit" class="btn btn-primary" value="Submit">
                                     </form>

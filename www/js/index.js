@@ -105,80 +105,49 @@ function onResume(){
 
 $(document).on("deviceready", onDeviceReady);
 
+var image_marker = "img/location2.png";
 
+var trash_image_marker = "img/garbage.png";
 
-/*var app = {
-    // Application Constructor
-    initialize: function() {
-        document.addEventListener("deviceready", this.onDeviceReady.bind(this), false);
-    },
+var allLocalTrash = [];
 
-    // deviceready Event Handler
-    //
-    // Bind any cordova events here. Common events are:
-    // 'pause', 'resume', etc.
-    onDeviceReady: function() {
-        this.receivedEvent("deviceready");
-        
-        createDatabase();
-    },
-
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
-
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
-
-        console.log('Received Event: ' + id);
-    }
-};
-
-app.initialize();*/
-
-/*function populateDB(tx) {
-    tx.executeSql('CREATE TABLE IF NOT EXISTS IMAGE (id INTEGER PRIMARY KEY AUTOINCREMENT, name, width, height)');
-}
-
-function errorCB(err) {
-    alert("Error processing SQL: "+err.code);
-}
-
-function successCB() {
-    var db = window.openDatabase("docteamDb", "1.0", "Cordova Demo", 200000);
-    db.transaction(function (tx) {
-		tx.executeSql('SELECT * FROM IMAGE', [], function (tx, results) {
-		  var len = results.rows.length, i;
-		  msg = "<p>Found rows: " + len + "</p>";
-		  document.querySelector('#textarea').innerHTML +=  msg;
-
-		  for (i = 0; i < len; i++){
-		     alert(results.rows.item(i).width );
-		  }
-
-		}, null);
-	});
-}
-
-function insertDB(tx) {
-	var img = document.getElementById("slika");
-	var width = img.clientWidth;
-	var height = img.clientHeight;
-	var test = "Ime slike";
-    tx.executeSql('INSERT INTO IMAGE (name, width, height) VALUES ("' +test+ '","' +width+ '","' +height+ '")');
-}*/
+var searchLocalTrash = [];
 
 $(function(){
 
-    //getMapLocation();
-
-    //watchMapPosition();
-
-    //watchAccelerationMove();
 
 });
+
+function returnAllLocalTrash()
+{
+  allLocalTrash = [];
+
+  db.transaction(function(tx) {
+          tx.executeSql("SELECT * FROM userReport", [], function(tx, res){
+            for(var i = 0; i < res.rows.length; i++)
+            {
+                //alert(res.rows.item(iii).id + " " + res.rows.item(iii).first_name + " " + res.rows.item(iii).last_name + " " + res.rows.item(iii).email + res.rows.item(iii).image);
+
+                item = {}
+                item ["id"] = res.rows.item(i).id;
+                item ["first_name"] = res.rows.item(i).first_name;
+                item ["last_name"] = res.rows.item(i).last_name;
+                item ["email"] = res.rows.item(i).email;
+                item ["mobile_number"] = res.rows.item(i).mobile_number;
+                item ["title"] = res.rows.item(i).title;
+                item ["short_text"] = res.rows.item(i).short_text;
+
+                item ["latitude"] = res.rows.item(i).latitude;
+                item ["longitude"] = res.rows.item(i).longitude;
+
+                item ["picture"] = res.rows.item(i).picture;
+
+                allLocalTrash.push(item);
+
+            }
+          })
+        });
+}
 
 // ------ FUNKCIJE AKCELERATORA I DETEKTOVANJE BRZINE KRETANJA ------
 
@@ -222,6 +191,8 @@ var map;
 
 var markers = [];
 
+var markersTrash = [];
+
 // Get geo coordinates
 
 function getMapLocation() {
@@ -258,7 +229,9 @@ function getMap(latitude, longitude) {
     var latLong = new google.maps.LatLng(latitude, longitude);
 
     var marker = new google.maps.Marker({
-        position: latLong
+        position: latLong,
+        animation: google.maps.Animation.DROP,
+        icon: image_marker
     });
 
     markers.push(marker);
@@ -275,7 +248,8 @@ function getMarker(latitude, longitude) {
     var latLong = new google.maps.LatLng(latitude, longitude);
 
     var marker = new google.maps.Marker({
-        position: latLong
+        position: latLong,
+        icon: image_marker
     });
 
     for (var i = markers.length - 1; i >= 0; i--) 
@@ -286,7 +260,44 @@ function getMarker(latitude, longitude) {
 
     markers.push(marker);
     marker.setMap(map);
+    //map.setCenter(marker.getPosition());
+}
+
+
+function setMarkerTrash(latitude, longitude, j) {
+
+    var latLong = new google.maps.LatLng(latitude, longitude);
+
+    var marker = new google.maps.Marker({
+        position: latLong,
+        icon: trash_image_marker
+        
+    });
+
+    marker.set('id', j);
+
+    marker.info = new google.maps.InfoWindow({
+        content:"Name: " + allLocalTrash[j].first_name + " " + allLocalTrash[j].last_name + "<br/> Email: " + allLocalTrash[j].email + "<br/> Mobile Number: " + allLocalTrash[j].mobile_number + "<br/><img class='popUpPicture' id='" + j + "' src='" + allLocalTrash[j].picture + "' onclick=prikaziSliku('"+allLocalTrash[j].picture+"')> <br/> Title: " +  allLocalTrash[j].title + "<br/> Description: " + allLocalTrash[j].short_text
+    });
+
+    markersTrash.push(marker);
+    marker.setMap(map);
+
+    google.maps.event.addListener(marker, 'click', function(){
+        marker.info.open(map, marker);
+
+    });
+
     map.setCenter(marker.getPosition());
+}
+
+function deleteMarkerTrash()
+{
+  for (var i = markersTrash.length - 1; i >= 0; i--) 
+    {
+      markersTrash[i].setMap(null);
+      markersTrash.pop();
+    }
 }
 
 // Success callback for watching your changing position
@@ -333,10 +344,6 @@ $("#takeAPicture").click(function(){
     document.getElementById("divSlika").style.display = "initial";
 });
 
-$("#getPicture").click(function(){
-    navigator.camera.getPicture(onSuccess, onFail, { quality: 50,sourceType: Camera.PictureSourceType.PHOTOLIBRARY });
-});
-
 $("#showNewBox").click(function(){
 
 });
@@ -364,22 +371,6 @@ $("#deleteFile").click(function(){
 
 function onSuccess(imageURI) {
     window.localStorage.setItem('image',imageURI);
-    var image = document.getElementById('slika');
-    image.src = window.localStorage.getItem('image');
-
-	 //var width = image.clientWidth;
-	 //var height = image.clientHeight;
-	 //var test = "Ime slike 123";
-
-	/*db.transaction(function(tx) {
-		tx.executeSql("SELECT * FROM image", [], function(tx, res){
-            for(var iii = 0; iii < res.rows.length; iii++)
-            {
-                alert(res.rows.item(iii).id + " " + res.rows.item(iii).name + " " + res.rows.item(iii).width + " " + res.rows.item(iii).height);
-            }
-        })
-	});*/
-
 }
 
 //ova funkcija treba da se pozove kada zelimo da upload sliku na server...
@@ -433,6 +424,18 @@ productImage.click(function () {
         $('body').css('overflow', 'auto');
     });
 });
+
+function prikaziSliku(slika)
+{
+    productOverlayImage.attr('src', slika);
+    productOverlay.fadeIn(100);
+    $('body').css('overflow', 'hidden');
+
+    $('.product-image-overlay-close').click(function () {
+        productOverlay.fadeOut(100);
+        $('body').css('overflow', 'auto');
+    });
+}
 
 // KREIRANJE FAJLA
 
@@ -546,6 +549,22 @@ function removeFile() {
 
 $("#submit").click(function(){
 
+
+    $("#firstNameError").text("");
+
+    $("#lastNameError").text("");
+
+    $("#emailError").text("");
+
+    $("#mobileNumberError").text("");
+
+    $("#titleNameError").text("");
+
+    $("#shortTextError").text("");
+
+    $("#imageError").text("");
+        
+
     //----- e ovako ovo ovde nam proverava da li je validno ono sto smo stavili od atribura u html -------
     var first_name_validate = $("#firstname")[0].checkValidity();
     var last_name_validate = $("#lastname")[0].checkValidity();
@@ -553,25 +572,35 @@ $("#submit").click(function(){
     var mobile_number_validate = $("#mobilenumber")[0].checkValidity();
     var title_validate = $("#title")[0].checkValidity();
     var short_text_validate = $("#shortText")[0].checkValidity();
+
+
+    //---- ako je sve ok izvalacim value koje se upisuju u bazu ----
+    var first_name = $("#firstname").val();
+    var last_name = $("#lastname").val();
+    var email = $("#email").val();
+    var mobile_number = $("#mobilenumber").val();
+    var title = $("#title").val();
+    var short_text = $("#shortText").val();
     
     //ovu image isto upusujes ovako kako jeste u bazu
     var image = window.localStorage.getItem('image');
 
     if(first_name_validate && last_name_validate && email_validate && mobile_number_validate && title_validate && short_text_validate && image)
     {
-        //---- ako je sve ok izvalacim value koje se upisuju u bazu ----
-        var first_name = $("#firstname").val();
-        var last_name = $("#lastname").val();
-        var email = $("#email").val();
-        var mobile_number = $("#mobilenumber").val();
-        var title = $("#title").val();
-        var short_text = $("#shortText").val();
 
-        //takodje u bazu trebas da ubacis ove dve promenjive koje su vec definisane Latitude i Longitude pukvalno ovako kako sam ti napisao tako se i zovu
         db.transaction(function(tx) {
-          alert("Uso sam!");
           tx.executeSql('INSERT INTO userReport (first_name, last_name, email, mobile_number, title, short_text, latitude, longitude, picture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [first_name, last_name, email, mobile_number, title, short_text, Latitude, Longitude, image], function(tx, res){
-            alert("Uspesno!");
+            alert("You are success report a trash :) Tnx :)");
+            $("#firstname").val("");
+            $("#lastname").val("");
+            $("#email").val("");
+            $("#mobilenumber").val("");
+            $("#title").val("");
+            $("#shortText").val("");
+
+            window.localStorage.setItem('image', undefined);
+
+            $('#mapaModal').modal('toggle');
         });
 
         }, function(err){
@@ -579,25 +608,191 @@ $("#submit").click(function(){
             alert("Error: " + err.message)
 
         });
-
-        db.transaction(function(tx) {
-          tx.executeSql("SELECT * FROM userReport", [], function(tx, res){
-            for(var iii = 0; iii < res.rows.length; iii++)
-            {
-                //alert(res.rows.item(iii).id + " " + res.rows.item(iii).first_name + " " + res.rows.item(iii).last_name + " " + res.rows.item(iii).email + res.rows.item(iii).image);
-                var image = document.getElementById('slika'+ iii);
-                image.src = res.rows.item(iii).picture;
-
-            }
-          })
-        });
     }
 
     else
     {
 
         //----- ako nije dobro mozemo da radimo sta ocemo ovde xD -----
-        alert("no");
+        if(!first_name_validate)
+        {
+          if(first_name.length > 0)
+          {
+            $("#firstNameError").text("Max number of characters is 20");
+          }
+
+          else
+          {
+            $("#firstNameError").text("You need to fill this filed");
+          }
+        }
+
+        if(!last_name_validate)
+        {
+          if(last_name.length > 0)
+          {
+            $("#lastNameError").text("Max number of characters is 30");
+          }
+
+          else
+          {
+            $("#lastNameError").text("You need to fill this filed");
+          }
+        }
+
+        if(!email_validate)
+        {
+          if(email.length > 0)
+          {
+            $("#emailError").text("No correct format of email");
+          }
+
+          else
+          {
+            $("#emailError").text("You need to fill this filed");
+          }
+        }
+
+        if(!mobile_number_validate)
+        {
+          if(mobile_number.length > 0)
+          {
+            $("#mobileNumberError").text("Max number of characters is 15");
+          }
+
+          else
+          {
+            $("#mobileNumberError").text("You need to fill this filed");
+          }
+        }
+
+        if(!title_validate)
+        {
+          if(title.length > 0)
+          {
+            $("#titleNameError").text("Max number of characters is 20");
+          }
+
+          else
+          {
+            $("#titleNameError").text("You need to fill this filed");
+          }
+        }
+
+        if(!short_text_validate)
+        {
+          if(short_text.length > 0)
+          {
+            $("#shortTextError").text("Max number of characters is 200");
+          }
+
+          else
+          {
+            $("#shortTextError").text("You need to fill this filed");
+          }
+        }
+
+        if(!image)
+        {
+          $("#imageError").text("You need to take or get a Picture");
+        }
     }
+});
+
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+  var dLon = deg2rad(lon2-lon1); 
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ; 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; // Distance in km
+  return d;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
+}
+
+$("#SearchIn").change(function(){
+
+  var searchIn = $("#SearchIn").val();
+
+  if(searchIn == 0)
+  {
+    $("#SearchBy").html("<option value='0' selected>Distance</option>");
+  }
+
+  else if(searchIn == 1)
+  {
+    $("#SearchBy").html("<option value='0' selected>Distance</option><option value='1'>Name</option><option value='2'>Mobile number</option><option value='3'>Email</option>");
+  }
+
+});
+
+$("#searchButton").click(function(){
+
+  var searchIn = $("#SearchIn").val();
+  var searchBy = $("#SearchBy").val();
+
+  if(searchIn == 0)
+  {
+    //lokalno trazenje
+
+    var radiusInM = parseInt($("#searchText").val());
+
+    if(radiusInM)
+    {
+      //prvo vadim sve lokacije iz baze
+
+      returnAllLocalTrash();
+
+      setTimeout(function() {
+
+        //brisem sve markere
+        deleteMarkerTrash();
+
+        //e sada posto ovde moze da bude samo pretrazivanje po x metara onda samo ovo radimo
+
+        var km;
+        var m;
+
+        var j = 0;
+
+        searchLocalTrash = [];
+
+        for(var i = 0; i < allLocalTrash.length; i++)
+        {
+          km = getDistanceFromLatLonInKm(Latitude, Longitude, allLocalTrash[i].latitude, allLocalTrash[i].longitude);
+
+          m = km * 1000;
+
+          if(radiusInM >= m)
+          {
+            searchLocalTrash = allLocalTrash;
+            //postavljam marker
+            setMarkerTrash(allLocalTrash[i].latitude, allLocalTrash[i].longitude, i);
+
+            j++;
+          }
+        }
+      }, 1000);
+    }
+
+    else
+    {
+      alert("You need to insert a NUMBER!!!");
+    }
+
+  }
+
+  else if(searchIn == 1)
+  {
+    //trazenje na serveru
+  }
+
 });
 
