@@ -281,3 +281,10 @@ body {
     width: 100px;
     height: 100px;
 }
+
+.logo {
+
+  font-size:25px;
+  color:rgb(51,122,183);
+  font-family:'Lato';
+}

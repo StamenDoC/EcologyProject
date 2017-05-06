@@ -991,3 +991,42 @@ $("#searchButton").click(function(){
 //navigator.vibrate([1000, 1000, 3000, 1000, 5000]);
 //gasim vibraciju
 //navigator.vibrate([]);
+
+//logo canvas
+
+function draw() {
+  var canvas = document.getElementById('logo');
+  ctx = canvas.getContext( '2d' );
+  generate(canvas,{
+  steps:50,
+  color:'rgb(51,122,183)'
+});
+
+
+function generate(canvas, opts) {
+  var opts = opts || {};
+  var steps = opts.steps || 50,
+      color = opts.color || 'rgb(0,0,0)',
+      center = {
+        x: canvas.width/2,
+        y: canvas.height/2
+      };
+  var phi = (Math.sqrt(5)+1)/2 - 1;
+  var golden = phi*2*Math.PI;
+  for(var i=0;i<steps;i++) {
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    var Lrad = (canvas.width/3)*i/steps;
+    var Lcirc = 2*Math.PI*Lrad;
+    var Larea = Math.pow(Lrad,2)*Math.PI;
+    var Srad = Math.sqrt( Sarea / Math.PI );
+    var Sarea = Larea / steps;
+    var angle = i*golden;
+    var x = center.x + Math.cos(angle) * Lrad;
+    var y = center.y + Math.sin(angle) * Lrad;
+    ctx.arc(x, y, Srad, 0, 360, false);
+    ctx.fill();
+  }
+}
+  
+}
