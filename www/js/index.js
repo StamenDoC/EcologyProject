@@ -19,6 +19,29 @@
 
 var watchID = null;
 var db = null;
+
+var image_marker = "img/location2.png";
+
+var trash_image_marker = "img/garbage.png";
+
+var allLocalTrash = [];
+
+var searchLocalTrash = [];
+
+var locationArroundMe = []; //lokacije pored koje sam vec prosao
+
+var Latitude = undefined;
+var Longitude = undefined;
+var map;
+
+var markers = [];
+
+var markersTrash = [];
+
+var markersTrashArroundMe = [];
+
+var tmp_array = [];
+
 document.addEventListener("deviceready", onDeviceReady, false);
 
 /*window.addEventListener("devicemotion", deviceMotionUpdate, false);
@@ -105,21 +128,110 @@ function onResume(){
 
 $(document).on("deviceready", onDeviceReady);
 
-var image_marker = "img/location2.png";
 
-var trash_image_marker = "img/garbage.png";
-
-var allLocalTrash = [];
-
-var searchLocalTrash = [];
 
 $(function(){
 
+   //na 10 sec ispitujem da li ima nesto oko mene
+   //setTimeout(setInterval(someReportAroundMe, 10000), 30000);
 
 });
 
-function returnAllLocalTrash()
+function setMarkerTrashAroundMe(latitude, longitude, j) {
+
+
+    var latLong = new google.maps.LatLng(latitude, longitude);
+
+    var marker = new google.maps.Marker({
+        position: latLong,
+        animation: google.maps.Animation.BOUNCE,
+        icon: trash_image_marker
+        
+    });
+
+    marker.set('id', j);
+
+    marker.info = new google.maps.InfoWindow({
+        content:"Name: " + tmp_array[j].first_name + " " + tmp_array[j].last_name + "<br/> Email: " + tmp_array[j].email + "<br/> Mobile Number: " + tmp_array[j].mobile_number + "<br/><img class='popUpPicture' id='" + j + "' src='" + tmp_array[j].picture + "' onclick=prikaziSliku('"+tmp_array[j].picture+"')> <br/> Title: " +  tmp_array[j].title + "<br/> Description: " + tmp_array[j].short_text
+    });
+
+    markersTrashArroundMe.push(marker);
+    marker.setMap(map);
+
+    google.maps.event.addListener(marker, 'click', function(){
+        marker.info.open(map, marker);
+
+    });
+
+    map.setCenter(marker.getPosition());
+}
+
+function setMarkerTrash(latitude, longitude, j) {
+
+    var latLong = new google.maps.LatLng(latitude, longitude);
+
+    var marker = new google.maps.Marker({
+        position: latLong,
+        icon: trash_image_marker
+        
+    });
+
+    marker.set('id', j);
+
+    marker.info = new google.maps.InfoWindow({
+        content:"Name: " + allLocalTrash[j].first_name + " " + allLocalTrash[j].last_name + "<br/> Email: " + allLocalTrash[j].email + "<br/> Mobile Number: " + allLocalTrash[j].mobile_number + "<br/><img class='popUpPicture' id='" + j + "' src='" + allLocalTrash[j].picture + "' onclick=prikaziSliku('"+allLocalTrash[j].picture+"')> <br/> Title: " +  allLocalTrash[j].title + "<br/> Description: " + allLocalTrash[j].short_text
+    });
+
+    markersTrash.push(marker);
+    marker.setMap(map);
+
+    google.maps.event.addListener(marker, 'click', function(){
+        marker.info.open(map, marker);
+
+    });
+
+    map.setCenter(marker.getPosition());
+}
+
+function deleteMarkerTrash()
 {
+  for (var i = markersTrash.length - 1; i >= 0; i--) 
+    {
+      markersTrash[i].setMap(null);
+      markersTrash.pop();
+    }
+}
+
+function deleteMarkerTrashArroundMe()
+{
+  for (var i = markersTrashArroundMe.length - 1; i >= 0; i--) 
+    {
+      markersTrashArroundMe[i].setMap(null);
+      markersTrashArroundMe.pop();
+    }
+}
+
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+  var dLon = deg2rad(lon2-lon1); 
+  var a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ; 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c; // Distance in km
+  return d;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
+}
+
+function returnAllLocalTrash(radiusInM)
+{
+
   allLocalTrash = [];
 
   db.transaction(function(tx) {
@@ -144,6 +256,32 @@ function returnAllLocalTrash()
 
                 allLocalTrash.push(item);
 
+            }
+
+            deleteMarkerTrash();
+
+            //e sada posto ovde moze da bude samo pretrazivanje po x metara onda samo ovo radimo
+
+            var km;
+            var m;
+
+            var j = 0;
+
+            searchLocalTrash = [];
+
+            for(var i = 0; i < allLocalTrash.length; i++)
+            {
+              km = getDistanceFromLatLonInKm(Latitude, Longitude, allLocalTrash[i].latitude, allLocalTrash[i].longitude);
+              m = km * 1000;
+
+              if(radiusInM >= m)
+              {
+                searchLocalTrash.push(allLocalTrash[i]);
+                //postavljam marker
+                setMarkerTrash(allLocalTrash[i].latitude, allLocalTrash[i].longitude, i);
+
+                j++;
+              }
             }
           })
         });
@@ -183,15 +321,8 @@ function stopWatch() {
 }
 
 
-//---- FUNKCIJE I PROMENJIVE ZA MAPU ---
+//---- FUNKCIJE  ZA MAPU ---
 
-var Latitude = undefined;
-var Longitude = undefined;
-var map;
-
-var markers = [];
-
-var markersTrash = [];
 
 // Get geo coordinates
 
@@ -239,6 +370,114 @@ function getMap(latitude, longitude) {
     marker.setMap(map);
     map.setZoom(15);
     map.setCenter(marker.getPosition());
+
+    setInterval(someReportAroundMe, 10000);
+}
+
+
+//kako se pomerim tako da ispitam da li sam blizu nekog objekta u krugu od 10m (pamtim pored kog sam vec prosao u toku ove sesije)
+
+function someReportAroundMe()
+{
+  tmp_array = [];
+
+  var radiusInM = 100; //100m oko mene
+
+  //ovde samo trebad a se pokuplja se servera
+  db.transaction(function(tx) {
+    tx.executeSql("SELECT * FROM userReport", [], function(tx, res){
+      for(var i = 0; i < res.rows.length; i++)
+      {
+          item = {}
+          item ["id"] = res.rows.item(i).id;
+          item ["first_name"] = res.rows.item(i).first_name;
+          item ["last_name"] = res.rows.item(i).last_name;
+          item ["email"] = res.rows.item(i).email;
+          item ["mobile_number"] = res.rows.item(i).mobile_number;
+          item ["title"] = res.rows.item(i).title;
+          item ["short_text"] = res.rows.item(i).short_text;
+
+          item ["latitude"] = res.rows.item(i).latitude;
+          item ["longitude"] = res.rows.item(i).longitude;
+
+          item ["picture"] = res.rows.item(i).picture;
+
+          tmp_array.push(item);
+
+      }
+
+      //deleteMarkerTrash();
+
+      //e sada posto ovde moze da bude samo pretrazivanje po x metara onda samo ovo radimo
+
+      var km;
+      var m;
+
+      var j = 0;
+
+      //brisem sve markere od ciji sam radijus izasao
+      for(var i = 0; i < locationArroundMe.length; i++)
+      {
+        km = getDistanceFromLatLonInKm(Latitude, Longitude, locationArroundMe[i].latitude, locationArroundMe[i].longitude);
+        m = km * 1000;
+
+        if(radiusInM < m)
+        {
+          //brisem iz niza
+
+          locationArroundMe.remove(i);
+          
+          deleteMarkerTrashArroundMe();
+
+          j++;
+        }
+      }
+
+      var test_promenjiva;
+
+      var imamo_novu_prijavu = false;
+
+      //dodajem nove markere koje vec nemam u niz
+      for(var i = 0; i < tmp_array.length; i++)
+      {
+        test_promenjiva = 1;
+
+        for(var j = 0; j < locationArroundMe.length; j++)
+        {
+
+          if(tmp_array[i].id == locationArroundMe[j].id)
+          {
+              test_promenjiva = 0;
+              break;
+          }
+        }
+
+        if(test_promenjiva == 1)
+        {
+          //postoji nova lokacija
+          km = getDistanceFromLatLonInKm(Latitude, Longitude, tmp_array[i].latitude, tmp_array[i].longitude);
+          m = km * 1000;
+
+          if(radiusInM >= m)
+          {
+            locationArroundMe.push(tmp_array[i]);
+
+            //postavljam marker
+            setMarkerTrashAroundMe(tmp_array[i].latitude, tmp_array[i].longitude, i);
+
+            imamo_novu_prijavu = true;
+          }
+        }
+      }
+
+      if(imamo_novu_prijavu)
+      {
+        //postavljam vibraciju
+        navigator.vibrate([1000, 1000, 1000]);
+      }
+
+    })
+  });
 }
 
 // Set only marker
@@ -260,44 +499,8 @@ function getMarker(latitude, longitude) {
 
     markers.push(marker);
     marker.setMap(map);
+
     //map.setCenter(marker.getPosition());
-}
-
-
-function setMarkerTrash(latitude, longitude, j) {
-
-    var latLong = new google.maps.LatLng(latitude, longitude);
-
-    var marker = new google.maps.Marker({
-        position: latLong,
-        icon: trash_image_marker
-        
-    });
-
-    marker.set('id', j);
-
-    marker.info = new google.maps.InfoWindow({
-        content:"Name: " + allLocalTrash[j].first_name + " " + allLocalTrash[j].last_name + "<br/> Email: " + allLocalTrash[j].email + "<br/> Mobile Number: " + allLocalTrash[j].mobile_number + "<br/><img class='popUpPicture' id='" + j + "' src='" + allLocalTrash[j].picture + "' onclick=prikaziSliku('"+allLocalTrash[j].picture+"')> <br/> Title: " +  allLocalTrash[j].title + "<br/> Description: " + allLocalTrash[j].short_text
-    });
-
-    markersTrash.push(marker);
-    marker.setMap(map);
-
-    google.maps.event.addListener(marker, 'click', function(){
-        marker.info.open(map, marker);
-
-    });
-
-    map.setCenter(marker.getPosition());
-}
-
-function deleteMarkerTrash()
-{
-  for (var i = markersTrash.length - 1; i >= 0; i--) 
-    {
-      markersTrash[i].setMap(null);
-      markersTrash.pop();
-    }
 }
 
 // Success callback for watching your changing position
@@ -549,7 +752,6 @@ function removeFile() {
 
 $("#submit").click(function(){
 
-
     $("#firstNameError").text("");
 
     $("#lastNameError").text("");
@@ -590,17 +792,46 @@ $("#submit").click(function(){
 
         db.transaction(function(tx) {
           tx.executeSql('INSERT INTO userReport (first_name, last_name, email, mobile_number, title, short_text, latitude, longitude, picture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [first_name, last_name, email, mobile_number, title, short_text, Latitude, Longitude, image], function(tx, res){
-            alert("You are success report a trash :) Tnx :)");
-            $("#firstname").val("");
-            $("#lastname").val("");
-            $("#email").val("");
-            $("#mobilenumber").val("");
-            $("#title").val("");
-            $("#shortText").val("");
+            
+             var options = new FileUploadOptions();
+              options.fileKey="file";
+              options.fileName=image.substr(image.lastIndexOf('/')+1);
+              options.mimeType="text/plain";
 
-            window.localStorage.setItem('image', undefined);
+              var params = new Object();
 
-            $('#mapaModal').modal('toggle');
+              options.params = params;
+
+              var ft = new FileTransfer();
+              ft.upload(image, "http://192.168.1.2:2000/upload", function(r){
+
+                $.ajax({
+                    type: 'POST',
+                    // make sure you respect the same origin policy with this url:
+                    // http://en.wikipedia.org/wiki/Same_origin_policy
+                    url: 'http://192.168.1.2:8001/getstring',
+                    data: { 
+                        "first_name": first_name, "last_name": last_name, "email": email, "mobile_number": mobile_number, "title": title, "short_text": short_text, "latitude": Latitude, "longitude": Longitude, "picture": r.response
+                    },
+                    success: function(msg){
+                        alert("You are success report a trash :) Tnx :)");
+
+                        $("#firstname").val("");
+                        $("#lastname").val("");
+                        $("#email").val("");
+                        $("#mobilenumber").val("");
+                        $("#title").val("");
+                        $("#shortText").val("");
+
+                        window.localStorage.setItem('image', undefined);
+
+                        $('#mapaModal').modal('toggle');
+                    }
+                });
+
+
+              }, fail, options);
+            
         });
 
         }, function(err){
@@ -699,24 +930,6 @@ $("#submit").click(function(){
     }
 });
 
-function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-  var R = 6371; // Radius of the earth in km
-  var dLat = deg2rad(lat2-lat1);  // deg2rad below
-  var dLon = deg2rad(lon2-lon1); 
-  var a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2)
-    ; 
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  var d = R * c; // Distance in km
-  return d;
-}
-
-function deg2rad(deg) {
-  return deg * (Math.PI/180)
-}
-
 $("#SearchIn").change(function(){
 
   var searchIn = $("#SearchIn").val();
@@ -735,7 +948,7 @@ $("#SearchIn").change(function(){
 
 $("#searchButton").click(function(){
 
-  var searchIn = $("#SearchIn").val();
+  /*var searchIn = $("#SearchIn").val();
   var searchBy = $("#SearchBy").val();
 
   if(searchIn == 0)
@@ -746,40 +959,7 @@ $("#searchButton").click(function(){
 
     if(radiusInM)
     {
-      //prvo vadim sve lokacije iz baze
-
-      returnAllLocalTrash();
-
-      setTimeout(function() {
-
-        //brisem sve markere
-        deleteMarkerTrash();
-
-        //e sada posto ovde moze da bude samo pretrazivanje po x metara onda samo ovo radimo
-
-        var km;
-        var m;
-
-        var j = 0;
-
-        searchLocalTrash = [];
-
-        for(var i = 0; i < allLocalTrash.length; i++)
-        {
-          km = getDistanceFromLatLonInKm(Latitude, Longitude, allLocalTrash[i].latitude, allLocalTrash[i].longitude);
-
-          m = km * 1000;
-
-          if(radiusInM >= m)
-          {
-            searchLocalTrash = allLocalTrash;
-            //postavljam marker
-            setMarkerTrash(allLocalTrash[i].latitude, allLocalTrash[i].longitude, i);
-
-            j++;
-          }
-        }
-      }, 1000);
+      returnAllLocalTrash(radiusInM);
     }
 
     else
@@ -792,7 +972,22 @@ $("#searchButton").click(function(){
   else if(searchIn == 1)
   {
     //trazenje na serveru
-  }
+  }*/
+
+ 
+
+   /*xmlhttp = new XMLHttpRequest();
+   xmlhttp.open("GET","http://192.168.1.2:8001/getstring", true);
+   xmlhttp.onreadystatechange=function(){
+         if (xmlhttp.readyState==4 && xmlhttp.status==200){
+           string=xmlhttp.responseText;
+         }
+   }
+   xmlhttp.send();*/
 
 });
 
+//vibrira 1 sec pa ne vibrira 1 sec pa vibrira 3 pa ne vibrira 1 pa vibrira 5
+//navigator.vibrate([1000, 1000, 3000, 1000, 5000]);
+//gasim vibraciju
+//navigator.vibrate([]);
