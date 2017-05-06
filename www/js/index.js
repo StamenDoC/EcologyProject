@@ -809,7 +809,7 @@ $("#submit").click(function(){
                     type: 'POST',
                     // make sure you respect the same origin policy with this url:
                     // http://en.wikipedia.org/wiki/Same_origin_policy
-                    url: 'http://192.168.1.2:8001/getstring',
+                    url: 'http://192.168.1.2:8001/insert',
                     data: { 
                         "first_name": first_name, "last_name": last_name, "email": email, "mobile_number": mobile_number, "title": title, "short_text": short_text, "latitude": Latitude, "longitude": Longitude, "picture": r.response
                     },
@@ -830,7 +830,7 @@ $("#submit").click(function(){
                 });
 
 
-              }, fail, options);
+              }, function(err){alert("Err");}, options);
             
         });
 
@@ -941,14 +941,14 @@ $("#SearchIn").change(function(){
 
   else if(searchIn == 1)
   {
-    $("#SearchBy").html("<option value='0' selected>Distance</option><option value='1'>Name</option><option value='2'>Mobile number</option><option value='3'>Email</option>");
+    $("#SearchBy").html("<option value='0' selected>Distance</option><option value='1'>Mobile number</option><option value='2'>Email</option>");
   }
 
 });
 
 $("#searchButton").click(function(){
 
-  /*var searchIn = $("#SearchIn").val();
+  var searchIn = $("#SearchIn").val();
   var searchBy = $("#SearchBy").val();
 
   if(searchIn == 0)
@@ -972,18 +972,99 @@ $("#searchButton").click(function(){
   else if(searchIn == 1)
   {
     //trazenje na serveru
-  }*/
 
- 
+    if(searchBy == 0)
+    {
+      //distanca
 
-   /*xmlhttp = new XMLHttpRequest();
-   xmlhttp.open("GET","http://192.168.1.2:8001/getstring", true);
-   xmlhttp.onreadystatechange=function(){
-         if (xmlhttp.readyState==4 && xmlhttp.status==200){
-           string=xmlhttp.responseText;
-         }
-   }
-   xmlhttp.send();*/
+     var radiusInM = parseInt($("#searchText").val());
+
+      if(radiusInM)
+      {
+
+        $.ajax({
+            type: 'POST',
+            // make sure you respect the same origin policy with this url:
+            // http://en.wikipedia.org/wiki/Same_origin_policy
+            url: 'http://192.168.1.2:8001/getDistanca',
+            data: { 
+                "radiusInM": radiusInM, Latitude: Latitude, Longitude, Longitude
+            },
+            success: function(msg){
+
+              deleteMarkerTrash();
+
+              var j = 0;
+
+              var obj = JSON.parse(msg);
+
+              searchLocalTrash = [];
+              for(var i = 0; i < obj.length; i++)
+              {
+                  searchLocalTrash.push(obj[i]);
+                  //postavljam marker
+                  setMarkerTrash(obj[i].latitude, obj[i].longitude, i);
+
+                  j++;
+                
+              }
+            }
+        });
+      }
+
+      else
+      {
+        alert("You need to insert a NUMBER!!!");
+      }
+
+
+      
+    }
+
+    else if(searchBy == 1)
+    {
+      //br telefona
+    }
+
+    else if(searchBy == 2)
+    {
+      //email
+
+      var email_set = $("#searchText").val();
+
+      $.ajax({
+          type: 'POST',
+          // make sure you respect the same origin policy with this url:
+          // http://en.wikipedia.org/wiki/Same_origin_policy
+          url: 'http://192.168.1.2:8001/getEmail',
+          data: { 
+              "email": email_set
+          },
+          success: function(msg){
+
+            deleteMarkerTrash();
+
+            var obj = JSON.parse(msg);
+
+            var j = 0;
+
+            searchLocalTrash = [];
+            for(var i = 0; i < obj.length; i++)
+            {
+                searchLocalTrash.push(obj[i]);
+                //postavljam marker
+                setMarkerTrash(obj[i].latitude, obj[i].longitude, i);
+
+                //$("body").append("<img src='"+obj[i].picture+"'>");
+
+                j++;
+              
+            }
+          }
+      });
+    }
+
+  }
 
 });
 
