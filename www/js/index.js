@@ -44,14 +44,6 @@ var tmp_array = [];
 
 document.addEventListener("deviceready", onDeviceReady, false);
 
-/*window.addEventListener("devicemotion", deviceMotionUpdate, false);
-
-function deviceMotionUpdate(e){
-    alert("x: " +  e.accelerationIncludingGravity.x);
-    alert("y: " +  e.accelerationIncludingGravity.y);
-    alert("z: " +  e.accelerationIncludingGravity.z);
-}*/
-
 function onDeviceReady()
 {	
 	//alert(navigator.accelerometer);
@@ -63,6 +55,8 @@ function onDeviceReady()
         //create table
         tx.executeSql("CREATE TABLE IF NOT EXISTS userReport (id integer primary key autoincrement, first_name varchar(20), last_name varchar(30), email varchar(50), "
         + "mobile_number varchar(15), title varchar(20), short_text text, latitude float, longitude float, picture text )", [], function(tx, res){
+
+            cordova.plugins.locationAccuracy.request(onRequestSuccess.bind(), onRequestFailure, cordova.plugins.locationAccuracy.REQUEST_PRIORITY_HIGH_ACCURACY);
             
         });
 
@@ -83,10 +77,7 @@ function onDeviceReady()
         onError("Accuracy request failed: error code="+error.code+"; error message="+error.message);
     }
 
-    cordova.plugins.locationAccuracy.request(onRequestSuccess.bind(), onRequestFailure, cordova.plugins.locationAccuracy.REQUEST_PRIORITY_HIGH_ACCURACY);
-
-
-    watchAccelerationMove();
+    
 
 }
 
@@ -95,6 +86,7 @@ function checkState(){
         if(authorized){
             getMapLocation();
             watchMapPosition();
+            watchAccelerationMove();
         }else{
             alert("Your location is not enabled, please turn on your Location Services that you can use this application.");
         }
@@ -305,6 +297,8 @@ function onSuccessAcceleration(acceleration) {
 	accelerationY = Math.abs(accelerationY);
 	var accelerationZ = (acceleration.z).toFixed(2);
 	accelerationZ = Math.abs(accelerationZ);
+
+  accelerationX = Math.round(accelerationX);
 
     $("#movementSpeed").html(accelerationX + " m/s");
 }
@@ -550,26 +544,6 @@ $("#takeAPicture").click(function(){
 $("#showNewBox").click(function(){
 
 });
-
-/*$("#createFile").click(function(){
-    createFile();
-
-});
-
-$("#writeFile").click(function(){
-    writeFile();
-
-});
-
-$("#readFile").click(function(){
-    readFile();
-
-});
-
-$("#deleteFile").click(function(){
-    removeFile();
-
-});*/
 
 
 function onSuccess(imageURI) {
@@ -941,7 +915,7 @@ $("#SearchIn").change(function(){
 
   else if(searchIn == 1)
   {
-    $("#SearchBy").html("<option value='0' selected>Distance</option><option value='1'>Mobile number</option><option value='2'>Email</option>");
+    $("#SearchBy").html("<option value='0' selected>Distance</option><option value='2'>Email</option>");
   }
 
 });
@@ -1016,14 +990,7 @@ $("#searchButton").click(function(){
       {
         alert("You need to insert a NUMBER!!!");
       }
-
-
       
-    }
-
-    else if(searchBy == 1)
-    {
-      //br telefona
     }
 
     else if(searchBy == 2)
@@ -1032,46 +999,50 @@ $("#searchButton").click(function(){
 
       var email_set = $("#searchText").val();
 
-      $.ajax({
-          type: 'POST',
-          // make sure you respect the same origin policy with this url:
-          // http://en.wikipedia.org/wiki/Same_origin_policy
-          url: 'http://192.168.1.2:8001/getEmail',
-          data: { 
-              "email": email_set
-          },
-          success: function(msg){
+      if(ValidateEmail(email_set))
+      {
 
-            deleteMarkerTrash();
+        $.ajax({
+            type: 'POST',
+            // make sure you respect the same origin policy with this url:
+            // http://en.wikipedia.org/wiki/Same_origin_policy
+            url: 'http://192.168.1.2:8001/getEmail',
+            data: { 
+                "email": email_set
+            },
+            success: function(msg){
 
-            var obj = JSON.parse(msg);
+              deleteMarkerTrash();
 
-            var j = 0;
+              var obj = JSON.parse(msg);
 
-            searchLocalTrash = [];
-            for(var i = 0; i < obj.length; i++)
-            {
-                searchLocalTrash.push(obj[i]);
-                //postavljam marker
-                setMarkerTrash(obj[i].latitude, obj[i].longitude, i);
+              var j = 0;
 
-                //$("body").append("<img src='"+obj[i].picture+"'>");
+              searchLocalTrash = [];
+              for(var i = 0; i < obj.length; i++)
+              {
+                  searchLocalTrash.push(obj[i]);
+                  //postavljam marker
+                  setMarkerTrash(obj[i].latitude, obj[i].longitude, i);
 
-                j++;
-              
+                  //$("body").append("<img src='"+obj[i].picture+"'>");
+
+                  j++;
+                
+              }
             }
-          }
-      });
+        });
+      }
+
+      else
+      {
+        alert("Pls input validate email address");
+      }
     }
 
   }
 
 });
-
-//vibrira 1 sec pa ne vibrira 1 sec pa vibrira 3 pa ne vibrira 1 pa vibrira 5
-//navigator.vibrate([1000, 1000, 3000, 1000, 5000]);
-//gasim vibraciju
-//navigator.vibrate([]);
 
 //logo canvas
 
@@ -1111,3 +1082,16 @@ function generate(canvas, opts) {
 }
   
 }
+
+function ValidateEmail(inputText)  
+{  
+  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;  
+  if(inputText.value.match(mailformat))  
+  {  
+    return true;  
+  }  
+  else  
+  { 
+    return false;  
+  }  
+} 
