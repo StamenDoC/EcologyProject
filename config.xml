@@ -1,15 +1,22 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="io.cordova.hellocordova" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>HelloCordova</name>
+    <name>EcologyProject</name>
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        Ecology Project is application for report trash ;)
     </description>
     <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Apache Cordova Team
+        DoC Team
     </author>
     <content src="index.html" />
     <plugin name="cordova-plugin-whitelist" spec="1" />
-    <access origin="*" />
+    <preference name="websecurity" value="disable" />
+    <access origin="*" subdomains="true"/>
+    <access origin="http://127.0.0.1:8001/" subdomains="true"/>
+    <access origin="http://127.0.0.1:8001/getstring" subdomains="true"/>
+
+    <access origin="*"/>
+    <access origin="http://127.0.0.1:8001/"/>
+    <access origin="http://127.0.0.1:8001/getstring"/>
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
@@ -22,7 +29,14 @@
     <plugin name="cordova.plugins.diagnostic" version="3" />
     
     <platform name="android">
+
         <allow-intent href="market:*" />
+
+        <!--<icon src="res/android/icon.png" density="ldpi" />
+        <icon src="res/android/icon.png" density="mdpi" />
+        <icon src="res/android/icon.png" density="hdpi" />
+        <icon src="res/android/icon.png" density="xhdpi" />-->
+
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
