@@ -76,9 +76,6 @@ function onDeviceReady()
     function onRequestFailure(error){
         onError("Accuracy request failed: error code="+error.code+"; error message="+error.message);
     }
-
-    
-
 }
 
 function checkState(){
